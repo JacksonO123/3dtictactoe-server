@@ -39,6 +39,7 @@ const waiting = new Map<string, socketType>();
 const sockets = new Map<string, socketType>();
 
 function setTurn(key: string) {
+  console.log('setting turn', key);
   const keys = [...sockets.keys()];
   let obj = {
     req: 'turn-data',
@@ -47,15 +48,16 @@ function setTurn(key: string) {
     },
   };
   for (let i = 0; i < keys.length; i++) {
-    const player = sockets.get(key);
+    const player = sockets.get(keys[i]);
     if (!player) continue;
     if (keys[i] === key) {
       player.turn = true;
-      sockets.set(key, player);
+      sockets.set(keys[i], player);
       obj.data.turn = true;
       player.socket.send(JSON.stringify(obj));
     } else {
       player.turn = false;
+      sockets.set(keys[i], player);
       obj.data.turn = false;
       player.socket.send(JSON.stringify(obj));
     }
@@ -79,13 +81,7 @@ function startGame() {
   obj1.data.char = 'O';
   player2.char = 'O';
   player2.socket.send(JSON.stringify(obj1));
-  const obj = {
-    req: 'game-data',
-    data: { game },
-  };
-  [...sockets.keys()].forEach(key => {
-    sockets.get(key)?.socket.send(JSON.stringify(obj));
-  });
+  sendGameData();
   setTurn(keys[Math.floor(Math.random() * 2)]);
 }
 
@@ -282,6 +278,7 @@ wss.on('connection', ws => {
 
   if (players < 2) {
     sockets.set(socketId, client);
+    players++;
   } else {
     const obj = {
       req: 'too-many-players',
@@ -290,9 +287,10 @@ wss.on('connection', ws => {
       },
     };
     ws.send(JSON.stringify(obj));
+    waiting.set(socketId, client);
   }
-  players++;
 
+  console.log(players);
   if (players == 2) startGame();
 
   type msgType = {
@@ -348,11 +346,22 @@ wss.on('connection', ws => {
   });
   ws.on('close', () => {
     console.log('Client disconnected');
-    sockets.delete(socketId);
-    players--;
-    if (players < 2) {
+    if (sockets.has(socketId)) {
+      players--;
+      sockets.delete(socketId);
       resetGame();
       sendGameData();
+      let waitingKeys = [...waiting.keys()];
+      console.log(waitingKeys);
+      while (players < 2) {
+        const key = waitingKeys.shift();
+        if (!key) continue;
+        const obj = waiting.get(key);
+        if (!obj) continue;
+        sockets.set(key, obj);
+        players++;
+        startGame();
+      }
     }
   });
   function stayAliveLoop() {
