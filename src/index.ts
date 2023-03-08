@@ -37,7 +37,6 @@ const waiting = new Map<string, socketType>();
 const sockets = new Map<string, socketType>();
 
 function setTurn(key: string) {
-  console.log('setting turn', key);
   const keys = [...sockets.keys()];
   let obj = {
     req: 'turn-data',
@@ -219,13 +218,11 @@ function getIdFromChar(char: charType) {
 }
 
 function sendGameData() {
-  console.log('### sending data');
   const obj = {
     req: 'game-data',
     data: { game }
   };
   [...sockets.values()].forEach((socket) => {
-    console.log('sending', obj, 'to', socket);
     socket.socket.send(JSON.stringify(obj));
   });
 }
@@ -256,7 +253,6 @@ wss.on('connection', (ws) => {
     waiting.set(socketId, client);
   }
 
-  console.log(players);
   if (players == 2) startGame();
 
   type msgType = {
@@ -270,7 +266,6 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (input) => {
     const msg = JSON.parse(input.toString()) as msgType;
-    console.log(msg);
     switch (msg.req) {
       case 'stay-alive':
         break;
@@ -284,7 +279,6 @@ wss.on('connection', (ws) => {
             game[x][y][z] = client.char;
             // send game data to clients
             const opponentKey = [...sockets.keys()].find((key) => key !== socketId);
-            console.log(socketId, opponentKey);
             if (!opponentKey) break;
             setTurn(opponentKey);
             sendGameData();
