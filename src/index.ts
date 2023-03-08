@@ -3,9 +3,7 @@ const port = process.env.PORT || 3000;
 import { Server, WebSocket } from 'ws';
 import { v4 as uuid } from 'uuid';
 
-const server = express().listen(port, () =>
-  console.log(`Listening on port ${port}`)
-);
+const server = express().listen(port, () => console.log(`Listening on port ${port}`));
 
 const wss = new Server({ server });
 
@@ -44,8 +42,8 @@ function setTurn(key: string) {
   let obj = {
     req: 'turn-data',
     data: {
-      turn: false,
-    },
+      turn: false
+    }
   };
   for (let i = 0; i < keys.length; i++) {
     const player = sockets.get(keys[i]);
@@ -72,8 +70,8 @@ function startGame() {
   let obj1 = {
     req: 'char',
     data: {
-      char: '',
-    },
+      char: ''
+    }
   };
   obj1.data.char = 'X';
   player1.char = 'X';
@@ -117,18 +115,12 @@ function checkRowZ(rowZ: charType[][][]) {
 }
 
 function checkDiagonalZ(gameSlice: charType[][]) {
-  if (
-    gameSlice[0][0] === gameSlice[1][1] &&
-    gameSlice[1][1] === gameSlice[2][2]
-  ) {
+  if (gameSlice[0][0] === gameSlice[1][1] && gameSlice[1][1] === gameSlice[2][2]) {
     if (gameSlice[0][0] !== '') {
       return gameSlice[0][0];
     }
   }
-  if (
-    gameSlice[0][2] === gameSlice[1][1] &&
-    gameSlice[1][1] === gameSlice[2][0]
-  ) {
+  if (gameSlice[0][2] === gameSlice[1][1] && gameSlice[1][1] === gameSlice[2][0]) {
     if (gameSlice[0][2] !== '') {
       return gameSlice[0][2];
     }
@@ -138,18 +130,12 @@ function checkDiagonalZ(gameSlice: charType[][]) {
 
 function checkDiagonalX(gameClone: charType[][][]) {
   for (let i = 0; i < 3; i++) {
-    if (
-      gameClone[2][0][i] == gameClone[1][1][i] &&
-      gameClone[1][1][i] == gameClone[0][2][i]
-    ) {
+    if (gameClone[2][0][i] == gameClone[1][1][i] && gameClone[1][1][i] == gameClone[0][2][i]) {
       if (gameClone[2][0][i] !== '') {
         return gameClone[2][0][i];
       }
     }
-    if (
-      gameClone[0][0][i] == gameClone[1][1][i] &&
-      gameClone[1][1][i] == gameClone[2][2][i]
-    ) {
+    if (gameClone[0][0][i] == gameClone[1][1][i] && gameClone[1][1][i] == gameClone[2][2][i]) {
       if (gameClone[0][0][i] !== '') {
         return gameClone[0][0][i];
       }
@@ -160,18 +146,12 @@ function checkDiagonalX(gameClone: charType[][][]) {
 
 function checkDiagonalY(gameClone: charType[][][]) {
   for (let i = 0; i < 3; i++) {
-    if (
-      gameClone[0][i][0] == gameClone[1][i][1] &&
-      gameClone[1][i][1] == gameClone[2][i][2]
-    ) {
+    if (gameClone[0][i][0] == gameClone[1][i][1] && gameClone[1][i][1] == gameClone[2][i][2]) {
       if (gameClone[0][i][0] !== '') {
         return gameClone[0][i][0];
       }
     }
-    if (
-      gameClone[0][i][2] == gameClone[1][i][1] &&
-      gameClone[1][i][1] == gameClone[2][i][0]
-    ) {
+    if (gameClone[0][i][2] == gameClone[1][i][1] && gameClone[1][i][1] == gameClone[2][i][0]) {
       if (gameClone[0][i][2] !== '') {
         return gameClone[0][i][2];
       }
@@ -213,32 +193,16 @@ function checkWinner() {
   let diagYWinner = checkDiagonalY(game);
   if (diagYWinner) return diagYWinner;
 
-  if (
-    game[0][0][0] === game[1][1][1] &&
-    game[1][1][1] === game[2][2][2] &&
-    game[0][0][0] !== ''
-  ) {
+  if (game[0][0][0] === game[1][1][1] && game[1][1][1] === game[2][2][2] && game[0][0][0] !== '') {
     return game[0][0][0];
   }
-  if (
-    game[0][0][2] === game[1][1][1] &&
-    game[1][1][1] === game[2][2][0] &&
-    game[0][0][2] !== ''
-  ) {
+  if (game[0][0][2] === game[1][1][1] && game[1][1][1] === game[2][2][0] && game[0][0][2] !== '') {
     return game[0][0][2];
   }
-  if (
-    game[0][2][0] === game[1][1][1] &&
-    game[1][1][1] === game[2][0][2] &&
-    game[0][2][0] !== ''
-  ) {
+  if (game[0][2][0] === game[1][1][1] && game[1][1][1] === game[2][0][2] && game[0][2][0] !== '') {
     return game[0][2][0];
   }
-  if (
-    game[0][2][2] === game[1][1][1] &&
-    game[1][1][1] === game[2][0][0] &&
-    game[0][2][2] !== ''
-  ) {
+  if (game[0][2][2] === game[1][1][1] && game[1][1][1] === game[2][0][0] && game[0][2][2] !== '') {
     return game[0][2][2];
   }
   return null;
@@ -255,16 +219,18 @@ function getIdFromChar(char: charType) {
 }
 
 function sendGameData() {
+  console.log('### sending data');
   const obj = {
     req: 'game-data',
-    data: { game },
+    data: { game }
   };
-  Object.values(sockets).forEach(socket => {
+  [...sockets.values()].forEach((socket) => {
+    console.log('sending', obj, 'to', socket);
     socket.socket.send(JSON.stringify(obj));
   });
 }
 
-wss.on('connection', ws => {
+wss.on('connection', (ws) => {
   console.log('Client connected');
 
   const socketId = uuid();
@@ -273,7 +239,7 @@ wss.on('connection', ws => {
     socket: ws,
     turn: false,
     char: '',
-    id: socketId,
+    id: socketId
   };
 
   if (players < 2) {
@@ -283,8 +249,8 @@ wss.on('connection', ws => {
     const obj = {
       req: 'too-many-players',
       data: {
-        message: 'Too many players',
-      },
+        message: 'Too many players'
+      }
     };
     ws.send(JSON.stringify(obj));
     waiting.set(socketId, client);
@@ -302,8 +268,9 @@ wss.on('connection', ws => {
     };
   };
 
-  ws.on('message', input => {
+  ws.on('message', (input) => {
     const msg = JSON.parse(input.toString()) as msgType;
+    console.log(msg);
     switch (msg.req) {
       case 'stay-alive':
         break;
@@ -313,12 +280,11 @@ wss.on('connection', ws => {
         if (player.turn) {
           // update game object
           const { x, y, z } = msg.data;
-          if (game[x][y][z] == '') {
+          if (game[x][y][z] === '') {
             game[x][y][z] = client.char;
             // send game data to clients
-            const opponentKey = [...sockets.keys()].find(
-              key => key !== socketId
-            );
+            const opponentKey = [...sockets.keys()].find((key) => key !== socketId);
+            console.log(socketId, opponentKey);
             if (!opponentKey) break;
             setTurn(opponentKey);
             sendGameData();
@@ -326,12 +292,12 @@ wss.on('connection', ws => {
             const winner = checkWinner();
             if (winner) {
               const winnerId = getIdFromChar(winner);
-              Object.values(sockets).forEach(socket => {
+              Object.values(sockets).forEach((socket) => {
                 const obj = {
                   req: 'winner',
                   data: {
-                    winner: winnerId == socket.id,
-                  },
+                    winner: winnerId == socket.id
+                  }
                 };
                 socket.socket.send(JSON.stringify(obj));
               });
@@ -351,22 +317,26 @@ wss.on('connection', ws => {
       sockets.delete(socketId);
       resetGame();
       sendGameData();
-      let waitingKeys = [...waiting.keys()];
-      console.log(waitingKeys);
-      while (players < 2) {
-        const key = waitingKeys.shift();
-        if (!key) continue;
-        const obj = waiting.get(key);
-        if (!obj) continue;
-        sockets.set(key, obj);
-        players++;
-        startGame();
-      }
+
+      const waitingKeys = [...waiting.keys()];
+      if (waitingKeys.length === 0) return;
+
+      const key = waitingKeys.shift();
+      if (!key) return;
+
+      const obj = waiting.get(key);
+      if (!obj) return;
+
+      sockets.set(key, obj);
+      players++;
+      startGame();
+    } else {
+      waiting.delete(socketId);
     }
   });
   function stayAliveLoop() {
     const obj = {
-      req: 'stay-alive',
+      req: 'stay-alive'
     };
     ws.send(JSON.stringify(obj));
     setTimeout(() => {
