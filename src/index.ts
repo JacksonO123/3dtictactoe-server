@@ -225,6 +225,9 @@ function sendGameData() {
   [...sockets.values()].forEach((socket) => {
     socket.socket.send(JSON.stringify(obj));
   });
+  [...waiting.values()].forEach((socket) => {
+    socket.socket.send(JSON.stringify(obj));
+  });
 }
 
 wss.on('connection', (ws) => {
