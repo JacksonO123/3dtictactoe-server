@@ -286,7 +286,8 @@ wss.on('connection', (ws) => {
             const winner = checkWinner();
             if (winner) {
               const winnerId = getIdFromChar(winner);
-              Object.values(sockets).forEach((socket) => {
+              console.log('id', winnerId);
+              [...sockets.values()].forEach((socket) => {
                 const obj = {
                   req: 'winner',
                   data: {
